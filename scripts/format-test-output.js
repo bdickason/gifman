@@ -1,0 +1,70 @@
+/**
+ * Reads Vitest --reporter=json output from stdin; prints only failures as JSON.
+ */
+
+/**
+ * @param {string} text
+ * @returns {object}
+ */
+function parseVitestJson(text) {
+  const start = text.indexOf('{');
+  if (start === -1) {
+    throw new Error('No JSON object found in stdin');
+  }
+  let depth = 0;
+  for (let i = start; i < text.length; i++) {
+    const c = text[i];
+    if (c === '{') depth++;
+    else if (c === '}') {
+      depth--;
+      if (depth === 0) {
+        return JSON.parse(text.slice(start, i + 1));
+      }
+    }
+  }
+  throw new Error('Unbalanced JSON object in stdin');
+}
+
+/**
+ * @param {string} msg
+ * @returns {string}
+ */
+function firstLine(msg) {
+  if (!msg || typeof msg !== 'string') return '';
+  const line = msg.split(/\r?\n/, 1)[0];
+  return line ?? '';
+}
+
+async function main() {
+  const chunks = [];
+  for await (const chunk of process.stdin) {
+    chunks.push(chunk);
+  }
+  const raw = Buffer.concat(chunks).toString('utf8');
+  const report = parseVitestJson(raw);
+
+  const failures = [];
+  const testResults = report.testResults ?? [];
+
+  for (const fileResult of testResults) {
+    const file = fileResult.name ?? '';
+    const assertions = fileResult.assertionResults ?? [];
+    for (const a of assertions) {
+      if (a.status !== 'failed') continue;
+      const messages = a.failureMessages ?? [];
+      const message = firstLine(messages[0] ?? '') || firstLine(fileResult.message ?? '');
+      failures.push({
+        file,
+        test: a.fullName ?? a.title ?? '',
+        message,
+      });
+    }
+  }
+
+  process.stdout.write(`${JSON.stringify({ failures }, null, 2)}\n`);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exitCode = 1;
+});

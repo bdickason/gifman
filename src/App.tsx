@@ -116,7 +116,7 @@ const App: React.FC = () => {
                   <h3 className="text-xl font-semibold text-yellow-200 mb-3">🛠️ Commands</h3>
                   <div className="space-y-2 text-gray-300">
                     <p><span className="arrow">→</span> <code className="code">npm run dev</code> - Start development server</p>
-                    <p><span className="arrow">→</span> <code className="code">npm run test:unit</code> - Run tests</p>
+                    <p><span className="arrow">→</span> <code className="code">npm run test:run</code> - Run tests</p>
                     <p><span className="arrow">→</span> <code className="code">npm run build</code> - Build for production</p>
                   </div>
                 </div>

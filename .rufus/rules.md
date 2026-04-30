@@ -1,0 +1,18 @@
+# Rufus Rules
+
+> Translated from .cursorrules
+
+* Only edit files in the root project directory. You can read other folders but do not edit them.
+* Always run tests after making any code changes. Fix failing tests before moving on to new features or improvements.
+* Add relevant logging so you can diagnose and debug issues on your own (vs relying on me verifying in browser)
+* Use the "divide and conquer" approach: test individual components in isolation before debugging complex interactions
+* If we spend more than 20 minutes debugging an issue, maintain a changelog in /CHANGELOG.md (or local to a folder) with how we fixed it and additional context for future agents.
+* [Docs] Write and maintae README.md's in individual folders up to date w/ context for future agents to quickly grok and make progress.
+* Try to read README files first before grep'ing code to ramp up context.
+* Prompt me for additional context or questions when my direction is unclear.
+* [Features] Plan first and confirm your plan with me before writing any code. Wait for my go-ahead.
+* [Ops] Let me run the server in the background (vs you spinning it up every time).
+* [Ops] Create 'safe' commands for repeated tasks like running tests so I can allowlist them in rufus and let you move faster. Always vet any changes to those commands for security before creating a new one.
+* Refer to (browse) git history but do not try to restore old versions of files. This seems to always lead to functionality being deleted and needing to be re-created.
+* When possible (especially during a big refactor), move or copy files instead of recreating them.
+* For security - please only give me sudo commands to run, never run them yourself.

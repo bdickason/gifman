@@ -11,16 +11,17 @@ describe('Server Configuration Tests', () => {
       
       const configContent = readFileSync(viteConfigPath, 'utf8');
       
-      // Check for required configuration elements
-      expect(configContent).toContain('basicSsl');
-      expect(configContent).toContain('https: true');
+      // Check for required configuration elements (HTTP dev server — no TLS)
+      expect(configContent).not.toContain('basicSsl');
+      expect(configContent).not.toMatch(/https:\s*true/);
       expect(configContent).toContain('port: 5173');
       expect(configContent).toContain('publicDir: \'public\'');
     });
 
-    it('should have SSL plugin configured', () => {
-      // This test verifies our SSL configuration
-      expect(true).toBe(true); // Placeholder for actual SSL verification
+    it('should use plain HTTP for the dev server', () => {
+      const viteConfigPath = join(process.cwd(), 'vite.config.ts');
+      const configContent = readFileSync(viteConfigPath, 'utf8');
+      expect(configContent).not.toContain('@vitejs/plugin-basic-ssl');
     });
   });
 
@@ -67,7 +68,8 @@ describe('Server Configuration Tests', () => {
       expect(packageJson.scripts).toHaveProperty('dev');
       expect(packageJson.scripts).toHaveProperty('dev:ssl');
       expect(packageJson.scripts).toHaveProperty('dev:persistent');
-      expect(packageJson.scripts).toHaveProperty('test:unit');
+      expect(packageJson.scripts).toHaveProperty('test');
+      expect(packageJson.scripts).toHaveProperty('test:run');
       expect(packageJson.scripts).toHaveProperty('build');
     });
 

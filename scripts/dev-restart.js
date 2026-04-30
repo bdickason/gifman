@@ -31,7 +31,7 @@ try {
 
   // Run tests
   console.log('4. Running unit tests...');
-  execSync('npm run test:unit', { stdio: 'inherit' });
+  execSync('npm run test:run', { stdio: 'inherit' });
   console.log('   ✅ Tests passed');
 
   // Start development server
