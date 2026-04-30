@@ -14,8 +14,8 @@ This directory contains comprehensive test suites for the application, ensuring 
 ### `server.test.ts`
 - **Purpose**: Server configuration and static file serving validation
 - **Coverage**:
-  - Vite configuration structure
-  - SSL plugin configuration
+  - Vite configuration structure (HTTP default in `vite.config.ts`, no `https: true`)
+  - Optional HTTPS overlay in `vite.config.ssl.ts` (`mergeConfig`, `server.https` / `preview.https`)
   - Static file serving (index.html)
   - Package.json scripts and dependencies
   - File structure validation

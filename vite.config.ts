@@ -11,11 +11,10 @@ export default defineConfig({
       // Allow serving files from parent directories
       allow: ['..']
     },
-    // Force reload on file changes
+    // Same WebSocket port as HTTP server — avoids failures when dev server picks
+    // another port (5176+) or when a fixed HMR port (e.g. 5174) is already in use.
     hmr: {
       overlay: true,
-      port: 5174,
-      host: 'localhost'
     },
     // Watch for file changes
     watch: {

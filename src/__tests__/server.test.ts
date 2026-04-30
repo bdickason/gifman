@@ -23,6 +23,15 @@ describe('Server Configuration Tests', () => {
       const configContent = readFileSync(viteConfigPath, 'utf8');
       expect(configContent).not.toContain('@vitejs/plugin-basic-ssl');
     });
+
+    it('should expose HTTPS via vite.config.ssl.ts overlay', () => {
+      const sslPath = join(process.cwd(), 'vite.config.ssl.ts');
+      expect(existsSync(sslPath)).toBe(true);
+      const sslContent = readFileSync(sslPath, 'utf8');
+      expect(sslContent).toContain('mergeConfig');
+      expect(sslContent).toMatch(/server:\s*\{[^}]*https:\s*true/s);
+      expect(sslContent).toMatch(/preview:\s*\{[^}]*https:\s*true/s);
+    });
   });
 
   describe('Static File Serving', () => {
@@ -55,7 +64,7 @@ describe('Server Configuration Tests', () => {
       expect(existsSync(rootIndexPath)).toBe(true);
       
       const htmlContent = readFileSync(rootIndexPath, 'utf8');
-      expect(htmlContent).toContain('🚀 Cursor Template');
+      expect(htmlContent).toContain('gifman');
       expect(htmlContent).toContain('<div id="root"></div>');
       expect(htmlContent).toContain('src="/src/main.tsx"');
     });
@@ -80,6 +89,13 @@ describe('Server Configuration Tests', () => {
       expect(packageJson.dependencies).toHaveProperty('react-dom');
       expect(packageJson.devDependencies).toHaveProperty('vite');
       expect(packageJson.devDependencies).toHaveProperty('vitest');
+      expect(packageJson.devDependencies).not.toHaveProperty('@vitejs/plugin-basic-ssl');
+    });
+
+    it('should wire dev:ssl and preview:ssl to vite.config.ssl.ts', () => {
+      const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
+      expect(packageJson.scripts['dev:ssl']).toContain('vite.config.ssl.ts');
+      expect(packageJson.scripts['preview:ssl']).toContain('vite.config.ssl.ts');
     });
   });
 

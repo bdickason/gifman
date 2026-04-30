@@ -36,7 +36,7 @@ try {
 
   // Start development server
   console.log('5. Starting development server...');
-  console.log('   🚀 Server will be available at: https://localhost:5173');
+  console.log('   🚀 Server will be available at: http://localhost:5173');
   console.log('   🔧 Debug hotkeys: Ctrl+D (debug panel), Ctrl+S (screenshot), Ctrl+L (logs)');
   console.log('   📝 Check browser console for debug messages');
   

@@ -44,8 +44,8 @@ npm run dev
 ### ✅ **Development Environment**
 - **Vite + React + TypeScript** - Lightning fast development
 - **Tailwind CSS** - Utility-first styling
-- **Hot Reload** - Instant feedback
-- **SSL Support** - HTTPS development server
+- **Hot Reload** — Instant feedback (HTTP dev server by default)
+- **Optional HTTPS** — `vite.config.ssl.ts` + `npm run dev:ssl` / `preview:ssl`
 - **Auto-restart** - Persistent development mode
 
 ### ✅ **Testing Setup**
@@ -80,7 +80,7 @@ npm run dev
 - [ ] Update `index.html` title and meta tags
 - [ ] Update `README.md` project description
 - [ ] Update `.cursorrules` if needed
-- [ ] Update `vite.config.ts` if custom config needed
+- [ ] Update `vite.config.ts` if custom config needed (optional HTTPS stays in `vite.config.ssl.ts`)
 
 ### 🎨 **Styling Updates**
 - [ ] Update `tailwind.config.js` colors/branding

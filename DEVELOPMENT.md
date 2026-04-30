@@ -29,12 +29,12 @@ npm run test:unit
 
 | Command | Description | Use Case |
 |---------|-------------|----------|
-| `npm run dev` | Standard development server | Daily development |
-| `npm run dev:ssl` | HTTPS development server | **RECOMMENDED** - SSL testing, mobile testing |
+| `npm run dev` | Standard development server (HTTP, default) | Daily development |
+| `npm run dev:ssl` | HTTPS via `vite.config.ssl.ts` | TLS testing, devices that require HTTPS |
 | `npm run dev:persistent` | Auto-restart development | Long development sessions |
 | `npm run dev:watch` | File watching with nodemon | When you want file watching |
 
-**Port 5173** is the standard development port.
+**Port 5173** is the standard development port. Default URL is **http://localhost:5173**; `dev:ssl` uses **https://localhost:5173** with Vite’s built-in certificate.
 
 ## **🧪 Testing Strategy**
 
@@ -62,7 +62,7 @@ Tests run in **jsdom environment** with proper mocks to avoid browser API issues
 USER: "I want to start the development server"
 YOU: "Run this command to start the development server:"
      cd /path/to/project
-     npm run dev:ssl
+     npm run dev
 
 USER: "The server started but I see an error"
 YOU: "Let me help you debug that. Can you show me the error message?"
@@ -247,14 +247,17 @@ kill -9 <PID>
 # Or change port in vite.config.ts
 ```
 
-### **2. SSL Certificate Issues**
+### **2. SSL / HTTPS locally**
 
 ```bash
-# Use the SSL development command
+# Optional HTTPS overlay (vite.config.ssl.ts)
 npm run dev:ssl
 
-# Or check if the SSL plugin is properly configured
+# Health check against HTTPS dev server (when running dev:ssl)
+npm run health-check:ssl
 ```
+
+Uses Vite’s built-in TLS (`server.https: true`); no `@vitejs/plugin-basic-ssl`.
 
 ### **3. Test Failures**
 
@@ -305,7 +308,7 @@ npm run dev:ssl
 - ✅ Hot reload works consistently
 - ✅ No TypeScript compilation errors
 - ✅ ESLint passes without warnings
-- ✅ HTTPS development available
+- ✅ HTTPS available via `npm run dev:ssl` when needed
 - ✅ Proper cleanup prevents memory leaks
 
 ---

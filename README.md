@@ -6,7 +6,7 @@ A production-ready template for web-based projects with optimized workflow, buil
 
 - **⚡ Lightning Fast**: Vite + React + TypeScript setup
 - **🧪 Testing Ready**: Vitest + jsdom with comprehensive mocks
-- **🔧 Development Tools**: Hot reload, SSL, and persistent development
+- **🔧 Development Tools**: Hot reload, optional HTTPS dev (`vite.config.ssl.ts`), persistent development
 - **📱 Responsive Design**: Tailwind CSS with mobile-first approach
 - **🚀 Performance**: Optimized builds and modern bundling
 - **🛡️ Error Handling**: Comprehensive error boundaries and logging
@@ -24,13 +24,13 @@ npm install
 ### 2. Start Development Server
 
 ```bash
-# Standard development
+# Standard development (HTTP on http://localhost:5173)
 npm run dev
 
-# HTTPS development (recommended)
+# HTTPS development when you need TLS locally (uses vite.config.ssl.ts)
 npm run dev:ssl
 
-# Persistent development with auto-restart
+# Persistent development with auto-restart (health check uses HTTP)
 npm run dev:persistent
 ```
 
@@ -84,7 +84,8 @@ project-name/
 │   ├── health-check.js     # Server monitoring
 │   └── health-check-ssl-auto.js # SSL monitoring
 ├── package.json
-├── vite.config.ts          # Vite configuration
+├── vite.config.ts          # Vite configuration (HTTP dev server)
+├── vite.config.ssl.ts      # Optional HTTPS overlay for dev / preview
 ├── vitest.config.ts        # Test configuration
 ├── tailwind.config.js      # Tailwind CSS config
 ├── tsconfig.json           # TypeScript config
@@ -95,12 +96,13 @@ project-name/
 
 | Script | Description |
 |--------|-------------|
-| `npm run dev` | Start development server |
-| `npm run dev:ssl` | Start HTTPS development server |
+| `npm run dev` | Start development server (HTTP) |
+| `npm run dev:ssl` | Start HTTPS development server (`vite.config.ssl.ts`) |
 | `npm run dev:watch` | Development with file watching |
 | `npm run dev:persistent` | Auto-restart development |
 | `npm run build` | Build for production |
-| `npm run preview` | Preview production build |
+| `npm run preview` | Preview production build (HTTP) |
+| `npm run preview:ssl` | Preview with HTTPS (`vite.config.ssl.ts`) |
 | `npm run test:unit` | Run unit tests |
 | `npm run test:unit:watch` | Watch mode tests |
 | `npm run health-check` | Monitor server health |
@@ -112,7 +114,7 @@ project-name/
 
 The template includes a pre-configured Vite setup with:
 - React plugin for JSX support
-- SSL plugin for HTTPS development
+- Default dev server over HTTP (`vite.config.ts`); optional TLS via `vite.config.ssl.ts` and `npm run dev:ssl` / `preview:ssl` (Vite built-in HTTPS, no extra plugin)
 - Port 5173 (standard Vite port)
 - Host binding for network access
 
@@ -216,7 +218,7 @@ The template includes comprehensive mocks for:
 
 ## 🔒 Security Considerations
 
-- HTTPS development by default
+- HTTPS available locally via `npm run dev:ssl` when needed (see `vite.config.ssl.ts`)
 - Input validation and sanitization
 - XSS prevention measures
 - Secure HTTP headers
@@ -316,7 +318,7 @@ The build process:
 ### Common Issues
 
 1. **Port already in use**: Change port in `vite.config.ts`
-2. **SSL certificate issues**: Run `npm run dev:ssl` for HTTPS
+2. **HTTPS locally**: Run `npm run dev:ssl` (uses `vite.config.ssl.ts`; browser may warn about self-signed cert)
 3. **Test failures**: Check `src/test-setup.ts` for mocks
 4. **Build errors**: Verify TypeScript configuration
 
