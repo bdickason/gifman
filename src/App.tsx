@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ErrorBoundary, DebugPanel } from './components';
+import { ErrorBoundary, DebugPanel, GifGallery } from './components';
 import { createLogger, debugLogger, screenshotCapture, hotkeyManager } from './utils';
 import './App.css';
 
@@ -38,9 +38,9 @@ const App: React.FC = () => {
       <div id="app-container" className="min-h-screen flex flex-col">
         <div className="synthwave-bg" aria-hidden />
 
-        <main className="relative z-10 flex flex-1 items-center justify-center p-6">
-          <div className="max-w-2xl w-full rounded-lg overflow-hidden shadow-2xl ring-2 ring-yellow-400/30 p-8 bg-black/30 backdrop-blur-sm text-yellow-300 text-center">
-            Testing bro2
+        <main className="relative z-10 flex flex-1 justify-center p-6 w-full min-w-0">
+          <div className="max-w-[1200px] w-full rounded-lg overflow-hidden shadow-2xl ring-2 ring-yellow-400/20 bg-black/45 backdrop-blur-sm">
+            <GifGallery />
           </div>
         </main>
 

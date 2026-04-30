@@ -1,301 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🚀 Web App Template - 80s Terminal</title>
-    <style>
-      body {
-        background-color: #000;
-        color: #00ff00;
-        font-family: 'Courier New', monospace;
-        margin: 0;
-        padding: 20px;
-        overflow: hidden;
-      }
-      
-      .terminal {
-        background-color: #000;
-        border: 2px solid #00ff00;
-        border-radius: 10px;
-        padding: 20px;
-        margin: 20px;
-        box-shadow: 0 0 20px #00ff00;
-        animation: glow 2s ease-in-out infinite alternate;
-      }
-      
-      .prompt {
-        color: #00ff00;
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
-      
-      .command {
-        color: #ffff00;
-        margin-bottom: 10px;
-      }
-      
-      .output {
-        color: #00ffff;
-        margin-bottom: 10px;
-        white-space: pre-wrap;
-      }
-      
-      .cursor {
-        animation: blink 1s infinite;
-      }
-      
-      .debug-info {
-        background-color: #000;
-        border: 1px solid #ff0000;
-        color: #ff0000;
-        padding: 10px;
-        margin: 10px;
-        font-size: 12px;
-        max-height: 200px;
-        overflow-y: auto;
-      }
-      
-      @keyframes blink {
-        0%, 50% { opacity: 1; }
-        51%, 100% { opacity: 0; }
-      }
-      
-      @keyframes glow {
-        from { box-shadow: 0 0 20px #00ff00; }
-        to { box-shadow: 0 0 30px #00ff00, 0 0 40px #00ff00; }
-      }
-      
-      .matrix-bg {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
-        opacity: 0.1;
-        font-size: 14px;
-        color: #00ff00;
-        overflow: hidden;
-      }
-      
-      .matrix-char {
-        position: absolute;
-        animation: fall 3s linear infinite;
-      }
-      
-      @keyframes fall {
-        0% { transform: translateY(-100vh); }
-        100% { transform: translateY(100vh); }
-      }
-      
-      .welcome-text {
-        text-align: center;
-        font-size: 24px;
-        margin-bottom: 30px;
-        text-shadow: 0 0 10px #00ff00;
-      }
-      
-      .status {
-        color: #00ff00;
-        font-size: 14px;
-        margin-top: 20px;
-        text-align: center;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="matrix-bg" id="matrix"></div>
-    
-    <div class="terminal">
-      <div class="welcome-text">🚀 WEB APP TEMPLATE v1.0 🚀</div>
-      
-      <div class="prompt">C:\TEMPLATE> <span class="cursor">_</span></div>
-      
-      <div class="command">dir</div>
-      <div class="output">
- Volume in drive C is TEMPLATE
- Volume Serial Number is 1337-2024
+<head>
+  <meta charset="UTF-8" />
+  <title>Rufus GIF Preview</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f0a1e;
+      color: #e8e0f0;
+      font-family: ui-monospace, monospace;
+      padding: 32px;
+    }
+    h1 {
+      font-size: 22px;
+      color: #c9ff00;
+      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: rgba(232,224,240,0.4);
+      margin-bottom: 40px;
+    }
+    h2 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(232,224,240,0.5);
+      margin: 32px 0 16px;
+      border-bottom: 1px solid rgba(232,224,240,0.1);
+      padding-bottom: 8px;
+    }
+    h2 span.count {
+      color: rgba(232,224,240,0.3);
+      font-size: 11px;
+      margin-left: 6px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: #1a1030;
+      border: 1px solid rgba(110,52,140,0.4);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+      background: #0f0a1e;
+    }
+    .card-body {
+      padding: 10px 12px;
+    }
+    .card-id {
+      font-size: 11px;
+      color: #c9ff00;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-tags {
+      font-size: 10px;
+      color: rgba(232,224,240,0.35);
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rufus GIF Preview</h1>
+  <p class="subtitle">Fetches live from GET /api/gifs — just reload to see changes</p>
+  <div id="root"></div>
 
- Directory of C:\TEMPLATE
+  <script>
+    function renderSection(title, items) {
+      const h2 = document.createElement('h2');
+      h2.innerHTML = title + `<span class="count">${items.length}</span>`;
+      document.getElementById('root').appendChild(h2);
 
-src\           &lt;DIR&gt;         React Components
-public\        &lt;DIR&gt;         Static Assets  
-package.json   &lt;FILE&gt;        Dependencies
-vite.config.ts &lt;FILE&gt;        Build Config
-README.md      &lt;FILE&gt;        Documentation
-DEVELOPMENT.md &lt;FILE&gt;        Workflow Guide
+      const grid = document.createElement('div');
+      grid.className = 'grid';
 
-        6 File(s)      Template Ready
-        2 Dir(s)       Development Set
-      </div>
-      
-      <div class="prompt">C:\TEMPLATE> <span class="cursor">_</span></div>
-      
-      <div class="command">npm run dev:ssl</div>
-      <div class="output">
-> template@1.0.0 dev:ssl
-> vite
-
-  VITE v7.1.2  ready in 234 ms
-
-  ➜  Local:   https://localhost:5173/
-  ➜  Network: https://192.168.1.100:5173/
-  ➜  press h to show help
-      </div>
-      
-      <div class="prompt">C:\TEMPLATE> <span class="cursor">_</span></div>
-      
-      <div class="command">echo "Template is ready for development!"</div>
-      <div class="output">Template is ready for development!</div>
-      
-      <div class="prompt">C:\TEMPLATE> <span class="cursor">_</span></div>
-      
-      <div class="command">help</div>
-      <div class="output">
-Available commands:
-  npm run dev          - Start development server
-  npm run dev:ssl      - Start HTTPS development server
-  npm run dev:persistent - Auto-restart development
-  npm run test:unit    - Run unit tests
-  npm run build        - Build for production
-  npm run preview      - Preview production build
-
-For full documentation, see README.md
-      </div>
-    </div>
-    
-    <div class="status">
-      ✅ Server Status: RUNNING | Port: 5173 | Protocol: HTTPS | Time: <span id="time"></span>
-    </div>
-    
-    <!-- Debug Information -->
-    <div class="debug-info" id="debug-info">
-      <strong>🐛 DEBUG INFO:</strong><br>
-      <span id="debug-content">Loading...</span>
-    </div>
-
-    <script>
-      // Debug logging function
-      function debugLog(message, data = null) {
-        const debugContent = document.getElementById('debug-content');
-        const timestamp = new Date().toLocaleTimeString();
-        let logMessage = `[${timestamp}] ${message}`;
-        
-        if (data) {
-          logMessage += ` | Data: ${JSON.stringify(data)}`;
-        }
-        
-        debugContent.innerHTML += logMessage + '<br>';
-        console.log(`[DEBUG] ${message}`, data);
-      }
-      
-      // Page load debugging
-      debugLog('Page loaded successfully');
-      debugLog('Document ready state', document.readyState);
-      debugLog('Current URL', window.location.href);
-      debugLog('User agent', navigator.userAgent);
-      
-      // Check if we're in development mode
-      if (typeof __DEV__ !== 'undefined') {
-        debugLog('Vite dev mode detected', __DEV__);
-      } else {
-        debugLog('Vite dev mode not detected');
-      }
-      
-      // Matrix rain effect
-      function createMatrixRain() {
-        debugLog('Creating matrix rain effect');
-        const matrix = document.getElementById('matrix');
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()';
-        
-        for (let i = 0; i < 50; i++) {
-          const char = document.createElement('div');
-          char.className = 'matrix-char';
-          char.textContent = chars[Math.floor(Math.random() * chars.length)];
-          char.style.left = Math.random() * 100 + '%';
-          char.style.animationDelay = Math.random() * 3 + 's';
-          char.style.animationDuration = (Math.random() * 2 + 2) + 's';
-          matrix.appendChild(char);
-        }
-        debugLog('Matrix rain effect created', { charCount: 50 });
-      }
-      
-      // Update time
-      function updateTime() {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString();
-        document.getElementById('time').textContent = timeString;
-      }
-      
-      // Test function to verify everything is working
-      function runTests() {
-        debugLog('Running basic tests...');
-        
-        // Test 1: DOM elements exist
-        const terminal = document.querySelector('.terminal');
-        const matrix = document.getElementById('matrix');
-        const debugInfo = document.getElementById('debug-info');
-        
-        debugLog('DOM test results', {
-          terminal: !!terminal,
-          matrix: !!matrix,
-          debugInfo: !!debugInfo
-        });
-        
-        // Test 2: Styles are applied
-        const computedStyle = window.getComputedStyle(terminal);
-        const backgroundColor = computedStyle.backgroundColor;
-        debugLog('Style test results', { backgroundColor });
-        
-        // Test 3: JavaScript is working
-        const testResult = 2 + 2;
-        debugLog('JavaScript test', { testResult, expected: 4, passed: testResult === 4 });
-        
-        debugLog('All tests completed');
-      }
-      
-      // Initialize everything
-      debugLog('Starting initialization...');
-      
-      try {
-        createMatrixRain();
-        updateTime();
-        setInterval(updateTime, 1000);
-        runTests();
-        
-        // Add some interactive elements
-        document.addEventListener('click', function() {
-          const cursor = document.querySelector('.cursor');
-          cursor.style.color = cursor.style.color === 'red' ? '#00ff00' : 'red';
-          debugLog('Cursor clicked, color changed');
-        });
-        
-        debugLog('Initialization completed successfully');
-      } catch (error) {
-        debugLog('Initialization error', error.message);
-        console.error('Initialization failed:', error);
-      }
-      
-      // Window load event
-      window.addEventListener('load', function() {
-        debugLog('Window load event fired');
-        debugLog('Page fully loaded');
+      items.forEach(gif => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <img src="${gif.url}" alt="${gif.id}" loading="lazy" />
+          <div class="card-body">
+            <div class="card-id">${gif.id}</div>
+            <div class="card-tags">${(gif.tags || []).join(' · ')}</div>
+          </div>
+        `;
+        grid.appendChild(card);
       });
-      
-      // Error handling
-      window.addEventListener('error', function(event) {
-        debugLog('JavaScript error occurred', {
-          message: event.message,
-          filename: event.filename,
-          lineno: event.lineno
-        });
+
+      document.getElementById('root').appendChild(grid);
+    }
+
+    fetch('/api/gifs')
+      .then(r => r.json())
+      .then(data => {
+        if (data.intro?.length)   renderSection('Intro', data.intro);
+        if (data.success?.length) renderSection('Success', data.success);
+        if (data.fail?.length)    renderSection('Fail', data.fail);
+      })
+      .catch(err => {
+        document.getElementById('root').innerHTML = `<p style="color:#ff6b6b">Failed to load gifs.json: ${err.message}</p>`;
       });
-      
-      // Unhandled promise rejection
-      window.addEventListener('unhandledrejection', function(event) {
-        debugLog('Unhandled promise rejection', event.reason);
-      });
-    </script>
-  </body>
+  </script>
+</body>
 </html>

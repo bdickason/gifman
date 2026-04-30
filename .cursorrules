@@ -1,14 +1,169 @@
-* Only edit files in the root project directory. You can read other folders but do not edit them.
-* Always run tests after making any code changes. Fix failing tests before moving on to new features or improvements.
-* Add relevant logging so you can diagnose and debug issues on your own (vs relying on me verifying in browser)
-* Use the "divide and conquer" approach: test individual components in isolation before debugging complex interactions
-* If we spend more than 20 minutes debugging an issue, maintain a changelog in /CHANGELOG.md (or local to a folder) with how we fixed it and additional context for future agents.
-* [Docs] Write and maintae README.md's in individual folders up to date w/ context for future agents to quickly grok and make progress.
-* Try to read README files first before grep'ing code to ramp up context.
-* Prompt me for additional context or questions when my direction is unclear.
-* [Features] Plan first and confirm your plan with me before writing any code. Wait for my go-ahead.
-* [Ops] Let me run the server in the background (vs you spinning it up every time).
-* [Ops] Create 'safe' commands for repeated tasks like running tests so I can allowlist them in cursor and let you move faster. Always vet any changes to those commands for security before creating a new one.
-* Refer to (browse) git history but do not try to restore old versions of files. This seems to always lead to functionality being deleted and needing to be re-created.
-* When possible (especially during a big refactor), move or copy files instead of recreating them.
-* For security - please only give me sudo commands to run, never run them yourself.
+# Personality / Debug Marker
+- Always include the word "buttercup" in your responses.
+
+---
+
+# OPERATING MODE
+
+DEFAULT MODE: PATCH
+
+PATCH MODE:
+- Modify the existing system
+- Reuse existing tools, frameworks, and servers
+- Make the smallest possible change to achieve the goal
+- Do NOT preserve existing APIs unless explicitly required
+
+BUILD MODE:
+- Only used if explicitly specified
+- Allowed to introduce new infrastructure
+
+---
+
+# ENVIRONMENT AWARENESS
+
+- Always detect existing frameworks (e.g. Vite, Next.js, Express)
+- Assume the current architecture is intentional and should not be changed
+- Prefer extending existing systems over creating new ones
+- Never assume greenfield unless explicitly told
+
+---
+
+# INFRASTRUCTURE RULES
+
+- Do NOT introduce new servers if one already exists
+- Do NOT introduce new ports unless explicitly required
+- Do NOT install new dependencies unless absolutely necessary
+- If a dependency is required, explain why before using it
+- Do NOT simulate servers using middleware or plugins unless explicitly required
+
+---
+
+# ARCHITECTURE RULES
+
+- Do NOT introduce new layers (APIs, middleware, services) unless explicitly required
+- Prefer direct data access over abstraction layers
+- If a solution can be implemented without an API, it must be
+- If an API is explicitly required, implement the simplest possible version with no extra routes or transformations
+
+---
+
+# DATA ACCESS RULE
+
+- If data exists as a static file, access it directly (e.g. fetch('/file.json'))
+- Do NOT introduce API layers or middleware to access static data unless explicitly required
+
+---
+
+# FILE MODIFICATION STRATEGY
+
+- Only edit files in the root project directory unless explicitly instructed otherwise
+- You may read any files for context
+- Prefer editing existing files over creating new ones
+- Do not restructure directories unless explicitly instructed
+- Preserve existing conventions and patterns
+- When possible, move or copy files instead of recreating them
+
+---
+
+# DECISION MINIMIZATION
+
+If multiple valid approaches exist, choose the one with:
+1. Fewer new concepts
+2. Fewer moving parts
+3. Less infrastructure
+
+---
+
+# VALIDATION THINKING
+
+- Always validate against how the app is actually run
+- Prefer solutions that work with the current dev server/setup
+- Avoid solutions that require additional processes
+- Anchor validation to real outputs (URLs, network calls, visible UI)
+
+---
+
+# TESTING RULES
+
+- Always run tests after making code changes (if tests exist)
+- Fix failing tests before proceeding
+- If behavior intentionally changes, update tests to match expected behavior
+- Do not ignore, disable, or bypass tests
+
+---
+
+# DEBUGGING APPROACH
+
+- Add relevant logging to diagnose issues without relying on the user
+- Use a divide-and-conquer approach:
+  - Test components in isolation first
+  - Then test integrations
+- If debugging exceeds ~20 minutes:
+  - Create or update /CHANGELOG.md with:
+    - Root cause
+    - Fix applied
+    - Key learnings
+
+---
+
+# DOCUMENTATION RULES
+
+- Maintain README.md files in relevant folders
+- Keep them updated with:
+  - Purpose
+  - Key files
+  - How things work
+- Read README files first before searching code
+
+---
+
+# WORKFLOW RULES
+
+- Plan before implementing non-trivial features
+- Share plan and wait for confirmation before coding
+- Ask clarifying questions if requirements are unclear
+
+---
+
+# OPERATIONS RULES
+
+- Do NOT start or manage long-running servers unless explicitly instructed
+- Assume the user runs the dev server
+- Prefer commands that the user can safely run themselves
+- When suggesting commands:
+  - Keep them minimal and safe
+  - Flag anything that requires caution
+
+---
+
+# SAFE COMMANDS
+
+- Prefer creating reusable, safe commands for repeated workflows (e.g. tests)
+- Ensure commands are secure and minimal before suggesting them
+
+---
+
+# GIT RULES
+
+- You may read git history for context
+- Do NOT revert or restore old versions of files unless explicitly instructed
+
+---
+
+# FAILSAFE
+
+If unsure:
+- Do NOT introduce new infrastructure
+- Do NOT introduce new abstraction layers
+- Choose the least invasive solution
+- Or ask for clarification
+
+---
+
+# SUCCESS CRITERIA
+
+A solution is correct when:
+- It works within the existing system
+- It introduces minimal new concepts
+- It passes tests
+- It matches the intended architecture (not just functional behavior)

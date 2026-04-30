@@ -4,6 +4,7 @@ export { Badge } from './Badge';
 export { Button } from './Button';
 export { Card } from './Card';
 export { Dropdown } from './Dropdown';
+export { GifGallery } from './GifGallery';
 export { ErrorBoundary } from './ErrorBoundary';
 export { Form } from './Form';
 export { Input } from './Input';

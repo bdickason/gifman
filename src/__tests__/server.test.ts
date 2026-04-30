@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { createServer } from 'vite';
 
 describe('Server Configuration Tests', () => {
   describe('Vite Configuration', () => {
@@ -14,8 +15,11 @@ describe('Server Configuration Tests', () => {
       // Check for required configuration elements (HTTP dev server — no TLS)
       expect(configContent).not.toContain('basicSsl');
       expect(configContent).not.toMatch(/https:\s*true/);
-      expect(configContent).toContain('port: 5173');
+      expect(configContent).toContain('port: 5174');
       expect(configContent).toContain('publicDir: \'public\'');
+      expect(configContent).toContain('gifman-gifs-api');
+      expect(configContent).toContain("pathname === '/api/gifs'");
+      expect(configContent).toContain('configurePreviewServer');
     });
 
     it('should use plain HTTP for the dev server', () => {
@@ -36,27 +40,24 @@ describe('Server Configuration Tests', () => {
 
   describe('Static File Serving', () => {
     it('should serve index.html from public directory', async () => {
-      // This test verifies that our public directory is configured correctly
       const publicDir = join(process.cwd(), 'public');
       const indexHtmlPath = join(publicDir, 'index.html');
-      
+
       expect(existsSync(publicDir)).toBe(true);
       expect(existsSync(indexHtmlPath)).toBe(true);
-      
+
       const htmlContent = readFileSync(indexHtmlPath, 'utf8');
-      expect(htmlContent).toContain('🚀 WEB APP TEMPLATE v1.0 🚀');
-      expect(htmlContent).toContain('80s Terminal');
+      expect(htmlContent).toContain('Rufus GIF Preview');
+      expect(htmlContent).toContain("fetch('/api/gifs')");
     });
 
     it('should have correct HTML structure', async () => {
       const htmlContent = readFileSync(join(process.cwd(), 'public', 'index.html'), 'utf8');
-      
-      // Check for required elements
+
       expect(htmlContent).toContain('<html lang="en">');
-      expect(htmlContent).toContain('<title>🚀 Web App Template - 80s Terminal</title>');
-      expect(htmlContent).toContain('<div class="terminal">');
-      expect(htmlContent).toContain('<div class="debug-info"');
-      expect(htmlContent).toContain('debugLog(');
+      expect(htmlContent).toContain('<title>Rufus GIF Preview</title>');
+      expect(htmlContent).toContain('id="root"');
+      expect(htmlContent).toContain('renderSection');
     });
 
     it('should have root index.html for Vite entry point', async () => {
@@ -84,7 +85,7 @@ describe('Server Configuration Tests', () => {
 
     it('should have required dependencies', async () => {
       const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
-      
+
       expect(packageJson.dependencies).toHaveProperty('react');
       expect(packageJson.dependencies).toHaveProperty('react-dom');
       expect(packageJson.devDependencies).toHaveProperty('vite');
@@ -114,6 +115,7 @@ describe('Server Configuration Tests', () => {
       expect(existsSync(join(cwd, 'tsconfig.json'))).toBe(true);
       expect(existsSync(join(cwd, 'README.md'))).toBe(true);
       expect(existsSync(join(cwd, 'DEVELOPMENT.md'))).toBe(true);
+      expect(existsSync(join(cwd, 'data', 'gifs.json'))).toBe(true);
     });
 
     it('should have component files', () => {
@@ -160,5 +162,29 @@ describe('Server Configuration Tests', () => {
       expect(eslintConfig).toContain('@eslint/js');
       expect(eslintConfig).toContain('typescript-eslint');
     });
+  });
+
+  describe('GET /api/gifs', () => {
+    it('returns gifs from /api/gifs', async () => {
+      const vite = await createServer({
+        configFile: join(process.cwd(), 'vite.config.ts'),
+        server: { port: 5174, strictPort: false },
+        logLevel: 'error',
+      });
+      await vite.listen();
+      const addr = vite.httpServer?.address();
+      const port =
+        addr && typeof addr === 'object' ? addr.port : vite.config.server.port;
+      console.log('[test][gifman-api] dev server port', port);
+      try {
+        const res = await fetch(`http://localhost:${port}/api/gifs`);
+        expect(res.status).toBe(200);
+        const json = (await res.json()) as { intro?: unknown };
+        expect(json.intro).toBeDefined();
+        expect(Array.isArray(json.intro)).toBe(true);
+      } finally {
+        await vite.close();
+      }
+    }, 30_000);
   });
 });
