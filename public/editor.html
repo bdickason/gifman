@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GIF editor — Rufus</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f0a1e;
+      color: #e8e0f0;
+      font-family: ui-monospace, monospace;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 22px;
+      color: #c9ff00;
+      margin-bottom: 4px;
+      letter-spacing: 0.05em;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: rgba(232,224,240,0.4);
+      margin-bottom: 24px;
+    }
+    .subtitle a { color: rgba(201,255,0,0.55); text-decoration: none; }
+    .subtitle a:hover { text-decoration: underline; }
+    .layout {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .panel {
+      background: #1a1030;
+      border: 1px solid rgba(110,52,140,0.4);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .panel-form {
+      width: 100%;
+      max-width: 360px;
+      flex-shrink: 0;
+    }
+    .panel-list {
+      flex: 1;
+      min-width: 280px;
+    }
+    .panel h2 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(232,224,240,0.5);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(232,224,240,0.1);
+    }
+    label {
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(232,224,240,0.45);
+      margin-bottom: 4px;
+      margin-top: 10px;
+    }
+    label:first-of-type { margin-top: 0; }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px 10px;
+      font: inherit;
+      font-size: 12px;
+      background: #0f0a1e;
+      border: 1px solid rgba(110,52,140,0.35);
+      border-radius: 6px;
+      color: #e8e0f0;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: rgba(201,255,0,0.45);
+    }
+    .tag-row { display: flex; gap: 8px; }
+    .tag-row input { flex: 1; min-width: 0; }
+    .preview-wrap {
+      margin-top: 12px;
+      background: #0f0a1e;
+      border: 1px solid rgba(110,52,140,0.3);
+      border-radius: 8px;
+      min-height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .preview-wrap img {
+      max-width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      display: block;
+    }
+    .preview-placeholder {
+      font-size: 11px;
+      color: rgba(232,224,240,0.25);
+      padding: 16px;
+      text-align: center;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    button {
+      font: inherit;
+      font-size: 11px;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid rgba(110,52,140,0.5);
+      background: rgba(110,52,140,0.25);
+      color: #e8e0f0;
+    }
+    button.primary {
+      background: rgba(201,255,0,0.15);
+      border-color: rgba(201,255,0,0.4);
+      color: #c9ff00;
+    }
+    button.danger {
+      border-color: rgba(255,107,107,0.4);
+      color: #ff6b6b;
+      background: rgba(255,107,107,0.08);
+    }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .err {
+      font-size: 11px;
+      color: #ff6b6b;
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+    .warn-collision {
+      font-size: 11px;
+      color: rgba(230, 194, 0, 0.95);
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+    .list-tools {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .count {
+      font-size: 11px;
+      color: rgba(232,224,240,0.35);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .card {
+      background: #0f0a1e;
+      border: 1px solid rgba(110,52,140,0.35);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .card img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      display: block;
+      background: #1a1030;
+    }
+    .card-body { padding: 10px; }
+    .card-id {
+      font-size: 11px;
+      color: #c9ff00;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-cat {
+      font-size: 10px;
+      color: rgba(232,224,240,0.45);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .card-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .card-actions button {
+      flex: 1;
+      padding: 6px 8px;
+      font-size: 10px;
+    }
+    .load-err {
+      color: #ff6b6b;
+      padding: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>GIF editor</h1>
+  <p class="subtitle">In-memory CRUD · export only · no writes · <a href="/">Preview</a></p>
+
+  <div id="load-error" class="load-err" hidden></div>
+
+  <div class="layout" id="app" hidden>
+    <div class="panel panel-form">
+      <h2 id="form-title">Add GIF</h2>
+      <form id="gif-form" autocomplete="off">
+        <label for="field-url">URL</label>
+        <input id="field-url" type="text" spellcheck="false" placeholder="https://…" />
+
+        <label for="field-id">ID (no spaces)</label>
+        <input id="field-id" type="text" spellcheck="false" placeholder="my_gif_id" />
+
+        <label>Tags (1–3)</label>
+        <div class="tag-row">
+          <input class="tag-input" type="text" maxlength="64" placeholder="tag 1" aria-label="Tag 1" />
+          <input class="tag-input" type="text" maxlength="64" placeholder="tag 2" aria-label="Tag 2" />
+          <input class="tag-input" type="text" maxlength="64" placeholder="tag 3" aria-label="Tag 3" />
+        </div>
+        <p style="font-size:10px;color:rgba(232,224,240,0.3);margin-top:6px;">Or use commas in the first field only (e.g. a,b,c).</p>
+
+        <label for="field-category">Category</label>
+        <select id="field-category">
+          <option value="intro">intro</option>
+          <option value="success">success</option>
+          <option value="fail">fail</option>
+        </select>
+
+        <label>Preview</label>
+        <div class="preview-wrap" id="preview-box">
+          <span class="preview-placeholder" id="preview-placeholder">Enter a URL to preview</span>
+          <img id="preview-img" alt="" style="display:none;" />
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="primary" id="btn-save">Save</button>
+          <button type="button" id="btn-cancel" hidden>Cancel</button>
+        </div>
+        <div class="err" id="form-error" hidden></div>
+        <div class="warn-collision" id="id-collision-warn" hidden></div>
+      </form>
+    </div>
+
+    <div class="panel panel-list">
+      <div class="list-tools">
+        <button type="button" class="primary" id="btn-export">Download JSON</button>
+        <button type="button" id="btn-copy-json">Copy Full JSON</button>
+        <span class="count" id="item-count">0 GIFs</span>
+      </div>
+      <div class="grid" id="gif-grid"></div>
+    </div>
+  </div>
+
+  <script>
+(function () {
+  const SECTIONS = ['intro', 'success', 'fail'];
+
+  /** @type {Array<{ id: string, url: string, tags: string[], category: string }>} */
+  let items = [];
+  /** @type {number | null} */
+  let editingIndex = null;
+
+  const loadErrorEl = document.getElementById('load-error');
+  const appEl = document.getElementById('app');
+  const formTitleEl = document.getElementById('form-title');
+  const formEl = document.getElementById('gif-form');
+  const fieldUrl = document.getElementById('field-url');
+  const fieldId = document.getElementById('field-id');
+  const fieldCategory = document.getElementById('field-category');
+  const tagInputs = () => Array.from(document.querySelectorAll('.tag-input'));
+  const btnSave = document.getElementById('btn-save');
+  const btnCancel = document.getElementById('btn-cancel');
+  const formError = document.getElementById('form-error');
+  const previewImg = document.getElementById('preview-img');
+  const previewPlaceholder = document.getElementById('preview-placeholder');
+  const gifGrid = document.getElementById('gif-grid');
+  const itemCountEl = document.getElementById('item-count');
+  const btnExport = document.getElementById('btn-export');
+  const btnCopyJson = document.getElementById('btn-copy-json');
+  const idCollisionWarn = document.getElementById('id-collision-warn');
+
+  function normalizeTags(tags) {
+    return tags
+      .map((t) => String(t).trim().toLowerCase())
+      .filter(Boolean)
+      .slice(0, 3);
+  }
+
+  function normalizeApiData(raw) {
+    const out = [];
+    for (const cat of SECTIONS) {
+      const list = raw[cat];
+      if (!Array.isArray(list)) continue;
+      for (const row of list) {
+        if (!row || typeof row.id !== 'string') continue;
+        out.push({
+          id: row.id,
+          url: typeof row.url === 'string' ? row.url : '',
+          tags: Array.isArray(row.tags) ? row.tags.map(String) : [],
+          category: cat,
+        });
+      }
+    }
+    return out;
+  }
+
+  function normalizeId(value) {
+    return String(value || '').trim().replace(/\s+/g, '_');
+  }
+
+  function parseTagsFromInputs() {
+    const inputs = tagInputs();
+    const first = inputs[0].value.trim();
+    if (first.includes(',')) {
+      return first.split(',').map((t) => t.trim()).filter(Boolean);
+    }
+    return inputs.map((el) => el.value.trim()).filter(Boolean);
+  }
+
+  function setTagsOnForm(tags) {
+    const arr = (tags || []).slice(0, 3);
+    const inputs = tagInputs();
+    inputs[0].value = arr[0] || '';
+    inputs[1].value = arr[1] || '';
+    inputs[2].value = arr[2] || '';
+  }
+
+  function showFormError(msg) {
+    formError.textContent = msg;
+    formError.hidden = !msg;
+  }
+
+  function hideIdCollisionWarn() {
+    idCollisionWarn.textContent = '';
+    idCollisionWarn.hidden = true;
+  }
+
+  function showIdCollisionWarn(msg) {
+    idCollisionWarn.textContent = msg;
+    idCollisionWarn.hidden = false;
+  }
+
+  function validate() {
+    const url = fieldUrl.value.trim();
+    const id = normalizeId(fieldId.value);
+    fieldId.value = id;
+    const tags = normalizeTags(parseTagsFromInputs());
+
+    if (!url) return 'URL is required.';
+    if (!id) return 'ID is required.';
+    if (tags.length < 1) return 'At least one tag is required (max 3).';
+    return '';
+  }
+
+  function updatePreview() {
+    const url = fieldUrl.value.trim();
+    if (!url) {
+      previewImg.removeAttribute('src');
+      previewImg.style.display = 'none';
+      previewPlaceholder.style.display = 'block';
+      previewPlaceholder.textContent = 'Enter a URL to preview';
+      return;
+    }
+    previewPlaceholder.style.display = 'none';
+    previewImg.style.display = 'block';
+    previewImg.alt = normalizeId(fieldId.value) || 'preview';
+    previewImg.src = url;
+    previewImg.onerror = function () {
+      previewPlaceholder.style.display = 'block';
+      previewPlaceholder.textContent = 'Could not load image';
+      previewImg.style.display = 'none';
+    };
+    previewImg.onload = function () {
+      previewPlaceholder.style.display = 'none';
+    };
+  }
+
+  function setEditingMode(on) {
+    editingIndex = on;
+    formTitleEl.textContent = on === null ? 'Add GIF' : 'Edit GIF';
+    btnCancel.hidden = on === null;
+    btnSave.textContent = on === null ? 'Save' : 'Update';
+  }
+
+  function sortItems() {
+    if (editingIndex !== null) {
+      const anchor = items[editingIndex];
+      items.sort((a, b) => a.id.localeCompare(b.id));
+      editingIndex = items.findIndex(
+        (x) => x.id === anchor.id && x.category === anchor.category,
+      );
+      if (editingIndex === -1) {
+        setEditingMode(null);
+      }
+    } else {
+      items.sort((a, b) => a.id.localeCompare(b.id));
+    }
+  }
+
+  function clearForm() {
+    fieldUrl.value = '';
+    fieldId.value = '';
+    setTagsOnForm([]);
+    fieldCategory.value = 'intro';
+    setEditingMode(null);
+    showFormError('');
+    updatePreview();
+  }
+
+  function renderList() {
+    gifGrid.innerHTML = '';
+    itemCountEl.textContent = items.length + (items.length === 1 ? ' GIF' : ' GIFs');
+
+    items.forEach((gif, index) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const img = document.createElement('img');
+      img.src = gif.url;
+      img.alt = gif.id;
+      img.loading = 'lazy';
+      const body = document.createElement('div');
+      body.className = 'card-body';
+      body.innerHTML =
+        '<div class="card-id"></div><div class="card-cat"></div><div class="card-actions"></div>';
+      body.querySelector('.card-id').textContent = gif.id;
+      body.querySelector('.card-cat').textContent = gif.category;
+
+      const actions = body.querySelector('.card-actions');
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.textContent = 'Edit';
+      editBtn.addEventListener('click', () => {
+        hideIdCollisionWarn();
+        fieldUrl.value = gif.url;
+        fieldId.value = gif.id;
+        setTagsOnForm(gif.tags);
+        fieldCategory.value = gif.category;
+        setEditingMode(index);
+        showFormError('');
+        updatePreview();
+        fieldUrl.focus();
+      });
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'danger';
+      delBtn.textContent = 'Delete';
+      delBtn.addEventListener('click', () => {
+        if (editingIndex === index) {
+          hideIdCollisionWarn();
+          clearForm();
+        } else if (editingIndex !== null && editingIndex > index) editingIndex -= 1;
+        items.splice(index, 1);
+        sortItems();
+        renderList();
+      });
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+
+      card.appendChild(img);
+      card.appendChild(body);
+      gifGrid.appendChild(card);
+    });
+  }
+
+  function toExportObject() {
+    const out = { intro: [], success: [], fail: [] };
+    for (const item of items) {
+      const cat = item.category;
+      if (!out[cat]) continue;
+      out[cat].push({
+        id: item.id,
+        url: item.url,
+        tags: item.tags.slice(),
+      });
+    }
+    return out;
+  }
+
+  function exportJsonText() {
+    return JSON.stringify(toExportObject(), null, 2);
+  }
+
+  function downloadJson() {
+    const text = exportJsonText() + '\n';
+    const blob = new Blob([text], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'gifs.updated.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  fieldUrl.addEventListener('input', updatePreview);
+  fieldId.addEventListener('input', updatePreview);
+  fieldId.addEventListener('blur', function () {
+    fieldId.value = normalizeId(fieldId.value);
+  });
+
+  tagInputs().forEach((el, i) => {
+    el.addEventListener('input', function () {
+      if (i !== 0) return;
+      const v = el.value;
+      if (v.includes(',')) {
+        tagInputs()[1].value = '';
+        tagInputs()[2].value = '';
+      }
+    });
+  });
+
+  btnCancel.addEventListener('click', function () {
+    hideIdCollisionWarn();
+    clearForm();
+  });
+
+  formEl.addEventListener('submit', function (e) {
+    e.preventDefault();
+    showFormError('');
+    hideIdCollisionWarn();
+    const err = validate();
+    if (err) {
+      showFormError(err);
+      return;
+    }
+    const rec = {
+      id: normalizeId(fieldId.value),
+      url: fieldUrl.value.trim(),
+      tags: normalizeTags(parseTagsFromInputs()),
+      category: fieldCategory.value,
+    };
+    const idCollision = items.some((item, i) => {
+      if (editingIndex !== null && i === editingIndex) return false;
+      return item.id === rec.id && item.category === rec.category;
+    });
+    if (editingIndex === null) {
+      items.push(rec);
+    } else {
+      items[editingIndex] = rec;
+    }
+    sortItems();
+    clearForm();
+    if (idCollision) {
+      showIdCollisionWarn(
+        'Warning: another GIF in this category already uses id "' + rec.id + '".',
+      );
+    }
+    renderList();
+  });
+
+  btnExport.addEventListener('click', downloadJson);
+
+  btnCopyJson.addEventListener('click', function () {
+    navigator.clipboard.writeText(exportJsonText()).catch(function () {});
+  });
+
+  fetch('/api/gifs')
+    .then((r) => {
+      if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+      return r.json();
+    })
+    .then((data) => {
+      items = normalizeApiData(data);
+      items.sort((a, b) => a.id.localeCompare(b.id));
+      appEl.hidden = false;
+      renderList();
+      updatePreview();
+    })
+    .catch((err) => {
+      loadErrorEl.hidden = false;
+      loadErrorEl.textContent = 'Failed to load /api/gifs: ' + err.message;
+    });
+})();
+  </script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GIFtv — Rufus GIF Preview</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f0a1e;
+      color: #e8e0f0;
+      font-family: ui-monospace, monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      gap: 24px;
+    }
+    h1 {
+      font-size: 22px;
+      color: #c9ff00;
+      letter-spacing: 0.05em;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: rgba(232,224,240,0.4);
+      margin-top: -12px;
+    }
+    .subtitle a {
+      color: rgba(201,255,0,0.55);
+      text-decoration: none;
+    }
+    .subtitle a:hover {
+      text-decoration: underline;
+    }
+    .stage {
+      position: relative;
+      width: min(90vw, 720px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    .gif-wrap {
+      flex: 1;
+      min-height: min(60vh, 480px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1a1030;
+      border: 1px solid rgba(110,52,140,0.4);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .gif-wrap img {
+      max-width: 100%;
+      max-height: min(60vh, 480px);
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      background: #0f0a1e;
+    }
+    #overlay {
+      position: absolute;
+      z-index: 1;
+      bottom: 16px;
+      left: 16px;
+      color: #fff;
+      font-size: 13px;
+      line-height: 1.2;
+      pointer-events: none;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.85), 0 0 12px rgba(0,0,0,0.5);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    #overlay-year {
+      opacity: 0.9;
+    }
+    .next-btn {
+      flex-shrink: 0;
+      width: 56px;
+      height: 56px;
+      border-radius: 10px;
+      border: 1px solid rgba(110,52,140,0.6);
+      background: #1a1030;
+      color: #c9ff00;
+      font-size: 28px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .next-btn:hover {
+      background: #251840;
+      border-color: rgba(201,255,0,0.35);
+    }
+    .next-btn:focus-visible {
+      outline: 2px solid #c9ff00;
+      outline-offset: 2px;
+    }
+    .error {
+      color: #ff6b6b;
+      font-size: 13px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>GIFtv</h1>
+  <p class="subtitle">Random channel · <a href="/">Catalog</a></p>
+
+  <div id="error" class="error" hidden></div>
+
+  <div class="stage">
+    <div class="gif-wrap">
+      <img id="gif" alt="" />
+    </div>
+    <button type="button" class="next-btn" id="nextBtn" aria-label="Next random GIF">→</button>
+    <div id="overlay">
+      <div id="overlay-title"></div>
+      <div id="overlay-year"></div>
+    </div>
+  </div>
+
+  <script>
+    const TAG_METADATA = {
+      back_to_the_future: { title: "Back to the Future", year: "1985" },
+      back_to_future: { title: "Back to the Future", year: "1985" },
+      captain_planet: { title: "Captain Planet and the Planeteers", year: "1990" },
+      ghost_busters: { title: "Ghostbusters", year: "1984" },
+      hackers: { title: "Hackers", year: "1995" },
+      home_alone: { title: "Home Alone", year: "1990" },
+      kung_fury: { title: "Kung Fury", year: "2015" },
+      outrun: { title: "OutRun", year: "1986" },
+      rocky: { title: "Rocky IV", year: "1985" },
+      thundercats: { title: "Thundercats", year: "1985" },
+      tmnt: { title: "Teenage Mutant Ninja Turtles", year: "1987" },
+      top_gun: { title: "Top Gun", year: "1986" },
+      voltron: { title: "Voltron", year: "1984" },
+      waynes_world: { title: "Wayne's World", year: "1992" },
+      bill_and_ted: { title: "Bill & Ted's Excellent Adventure", year: "1989" },
+      bloodsport: { title: "Bloodsport", year: "1988" },
+      breakfast_club: { title: "The Breakfast Club", year: "1985" },
+      ferris_bueller: { title: "Ferris Bueller's Day Off", year: "1986" },
+      karate_kid: { title: "The Karate Kid", year: "1984" },
+      the_wizard: { title: "The Wizard", year: "1989" },
+      goonies: { title: "The Goonies", year: "1985" },
+      major_league: { title: "Major League", year: "1989" }
+    };
+
+    let allGifs = [];
+    let lastShown = null;
+    let cycleIntervalId = null;
+    let overlayTimeout = null;
+
+    const imgEl = document.getElementById('gif');
+    const nextBtn = document.getElementById('nextBtn');
+    const errorEl = document.getElementById('error');
+    const overlay = document.getElementById('overlay');
+    const overlayTitle = document.getElementById('overlay-title');
+    const overlayYear = document.getElementById('overlay-year');
+
+    function formatId(id) {
+      return id
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function getMetadata(gif) {
+      for (const tag of gif.tags || []) {
+        if (TAG_METADATA[tag]) {
+          return TAG_METADATA[tag];
+        }
+      }
+
+      return {
+        title: formatId(gif.id),
+        year: ""
+      };
+    }
+
+    function showOverlay(gif) {
+      const meta = getMetadata(gif);
+
+      overlayTitle.textContent = meta.title;
+      overlayYear.textContent = meta.year;
+
+      overlay.style.opacity = 1;
+
+      clearTimeout(overlayTimeout);
+      overlayTimeout = setTimeout(() => {
+        overlay.style.opacity = 0;
+      }, 3000);
+    }
+
+    function getRandomGif() {
+      if (!allGifs.length) return null;
+      if (allGifs.length === 1) return allGifs[0];
+      let choice;
+      const lastUrl = lastShown ? lastShown.url : null;
+      let guard = 0;
+      do {
+        choice = allGifs[Math.floor(Math.random() * allGifs.length)];
+        guard++;
+      } while (lastUrl !== null && choice.url === lastUrl && guard < 64);
+      return choice;
+    }
+
+    function displayGif(gif) {
+      if (!gif) return;
+      lastShown = gif;
+      imgEl.src = gif.url;
+      imgEl.alt = gif.id || '';
+      showOverlay(gif);
+    }
+
+    function advance() {
+      const gif = getRandomGif();
+      displayGif(gif);
+    }
+
+    function startCycle() {
+      if (cycleIntervalId !== null) {
+        clearInterval(cycleIntervalId);
+      }
+      cycleIntervalId = setInterval(advance, 5000);
+    }
+
+    function manualAdvance() {
+      advance();
+      startCycle();
+    }
+
+    fetch('/api/gifs')
+      .then(function (r) {
+        if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+        return r.json();
+      })
+      .then(function (data) {
+        allGifs = Object.values(data).flat();
+        if (!allGifs.length) {
+          errorEl.hidden = false;
+          errorEl.textContent = 'No GIFs available.';
+          return;
+        }
+        advance();
+        startCycle();
+      })
+      .catch(function (err) {
+        errorEl.hidden = false;
+        errorEl.textContent = 'Failed to load GIFs: ' + err.message;
+      });
+
+    nextBtn.addEventListener('click', manualAdvance);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        manualAdvance();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,71 +1,46 @@
-# Personality / Debug Marker
-- Always include the word "buttercup" in your responses.
-
----
-
 # OPERATING MODE
 
 DEFAULT MODE: PATCH
 
 PATCH MODE:
 - Modify the existing system
-- Reuse existing tools, frameworks, and servers
-- Make the smallest possible change to achieve the goal
-- Do NOT preserve existing APIs unless explicitly required
+- Reuse existing tools and patterns
+- Make the smallest possible change
 
 BUILD MODE:
-- Only used if explicitly specified
-- Allowed to introduce new infrastructure
+- Only when explicitly specified
+- May introduce new infrastructure
 
 ---
 
-# ENVIRONMENT AWARENESS
+# SYSTEM DESIGN RULES
 
-- Always detect existing frameworks (e.g. Vite, Next.js, Express)
-- Assume the current architecture is intentional and should not be changed
+- Detect and respect existing frameworks and architecture
+- Assume current structure is intentional
 - Prefer extending existing systems over creating new ones
-- Never assume greenfield unless explicitly told
 
----
+- Do NOT introduce:
+  - new servers
+  - new ports
+  - new abstraction layers (APIs, middleware, services)
+  unless explicitly required
 
-# INFRASTRUCTURE RULES
-
-- Do NOT introduce new servers if one already exists
-- Do NOT introduce new ports unless explicitly required
-- Do NOT install new dependencies unless absolutely necessary
-- If a dependency is required, explain why before using it
-- Do NOT simulate servers using middleware or plugins unless explicitly required
-
----
-
-# ARCHITECTURE RULES
-
-- Do NOT introduce new layers (APIs, middleware, services) unless explicitly required
 - Prefer direct data access over abstraction layers
-- If a solution can be implemented without an API, it must be
-- If an API is explicitly required, implement the simplest possible version with no extra routes or transformations
+- If data is static, access it directly (e.g. fetch('/file.json'))
 
 ---
 
-# DATA ACCESS RULE
+# FILE STRATEGY
 
-- If data exists as a static file, access it directly (e.g. fetch('/file.json'))
-- Do NOT introduce API layers or middleware to access static data unless explicitly required
-
----
-
-# FILE MODIFICATION STRATEGY
-
-- Only edit files in the root project directory unless explicitly instructed otherwise
-- You may read any files for context
-- Prefer editing existing files over creating new ones
-- Do not restructure directories unless explicitly instructed
-- Preserve existing conventions and patterns
-- When possible, move or copy files instead of recreating them
+- Only edit files in the defined EDIT SCOPE
+- You may update documentation if required for accuracy
+- Prefer editing over creating new files
+- Do not restructure directories unless instructed
+- Preserve existing conventions
 
 ---
 
-# DECISION MINIMIZATION
+# DECISION MAKING
 
 If multiple valid approaches exist, choose the one with:
 1. Fewer new concepts
@@ -74,96 +49,189 @@ If multiple valid approaches exist, choose the one with:
 
 ---
 
-# VALIDATION THINKING
+# VALIDATION & DEBUGGING
 
-- Always validate against how the app is actually run
-- Prefer solutions that work with the current dev server/setup
-- Avoid solutions that require additional processes
-- Anchor validation to real outputs (URLs, network calls, visible UI)
+- Validate against how the app actually runs
+- Prefer real outputs (UI, network, behavior) over assumptions
 
----
+- Add logging when needed to diagnose issues
+- Debug in stages:
+  - isolate components
+  - then test integrations
 
-# TESTING RULES
-
-- Always run tests after making code changes (if tests exist)
-- Fix failing tests before proceeding
-- If behavior intentionally changes, update tests to match expected behavior
-- Do not ignore, disable, or bypass tests
-
----
-
-# DEBUGGING APPROACH
-
-- Add relevant logging to diagnose issues without relying on the user
-- Use a divide-and-conquer approach:
-  - Test components in isolation first
-  - Then test integrations
 - If debugging exceeds ~20 minutes:
-  - Create or update /CHANGELOG.md with:
-    - Root cause
-    - Fix applied
-    - Key learnings
+  - update CHANGELOG.md with:
+    - root cause
+    - fix
+    - key learnings
 
 ---
 
-# DOCUMENTATION RULES
+# TESTING & FEEDBACK LOOP
 
-- Maintain README.md files in relevant folders
-- Keep them updated with:
-  - Purpose
-  - Key files
-  - How things work
-- Read README files first before searching code
-
----
-
-# WORKFLOW RULES
-
-- Plan before implementing non-trivial features
-- Share plan and wait for confirmation before coding
-- Ask clarifying questions if requirements are unclear
+- You do NOT have the ability to run shell commands
+- Any attempt to run npm, bash, or system commands will fail
+- The ONLY way to run tests is:
+    RUN_TESTS
+- Always run tests after changes (if available)
+- Fix failures before proceeding
+- Update tests if behavior intentionally changes
 
 ---
 
-# OPERATIONS RULES
+# TEST EXECUTION (STRICT)
 
-- Do NOT start or manage long-running servers unless explicitly instructed
-- Assume the user runs the dev server
-- Prefer commands that the user can safely run themselves
-- When suggesting commands:
-  - Keep them minimal and safe
-  - Flag anything that requires caution
+- You do NOT have the ability to run shell commands
+
+- NEVER attempt:
+    npm run test
+    npm run test:run
+    vitest
+    any shell command
+
+- These will always fail
+
+- The ONLY way to run tests is:
+    RUN_TESTS
+
+- When asked to run tests:
+    → output RUN_TESTS immediately
+    → do NOT explain or attempt alternatives
+
+- When emitting RUN_TESTS:
+  - do NOT include explanations
+  - do NOT describe what you tried
+  - output ONLY:
+    RUN_TESTS
 
 ---
 
-# SAFE COMMANDS
+## TEST BEHAVIOR
 
-- Prefer creating reusable, safe commands for repeated workflows (e.g. tests)
-- Ensure commands are secure and minimal before suggesting them
+- If status === "pass":
+  - continue or conclude
+
+- If status === "fail":
+  - analyze failures carefully
+  - identify root cause
+  - apply minimal fix
+  - then emit RUN_TESTS again
+
+- Do NOT:
+  - assume tests pass
+  - fabricate results
+  - skip test execution
 
 ---
 
-# GIT RULES
+## ITERATION AWARENESS
 
-- You may read git history for context
-- Do NOT revert or restore old versions of files unless explicitly instructed
+- Avoid repeated retries without meaningful changes
+- If failures persist:
+  - reconsider approach
+  - avoid repeating the same fix
+
+- Use metadata when available:
+  - meta.attempt
+  - meta.max_attempts
+  - meta.iteration_limit_reached
+
+- If iteration_limit_reached:
+  - stop retrying
+  - reassess solution
+
+---
+
+# DOCUMENTATION
+
+- Keep README / DEVELOPMENT / CHANGELOG accurate
+- Only update what is affected
+- Keep updates minimal and precise
+
+---
+
+# DOCUMENTATION ALIGNMENT
+
+- After any non-trivial change, you MUST evaluate whether documentation is affected
+
+This includes:
+- README.md
+- DEVELOPMENT.md
+- CHANGELOG.md
+
+---
+
+## REQUIRED CHECK
+
+Before completing a task, ask:
+
+- Does this change affect:
+  - how the system works?
+  - how tests are run?
+  - how the app is used?
+  - developer workflow?
+
+If YES:
+- update the relevant documentation
+
+If NO:
+- explicitly confirm that no documentation update is needed
+
+---
+
+## UPDATE GUIDELINES
+
+- Only update the specific sections impacted
+- Do NOT rewrite entire documents
+- Keep changes minimal and precise
+- Do NOT add speculative or unnecessary content
+
+---
+
+## FAILURE CONDITION
+
+A task is NOT complete if:
+- behavior has changed
+- AND documentation is outdated
+
+---
+
+# WORKFLOW
+
+- Plan before implementing non-trivial changes
+- Confirm plan before coding
+- Ask questions if unclear
+
+---
+
+# OPERATIONS
+
+- Do NOT run long-lived servers
+- Assume user manages runtime
+- Suggest only safe, minimal commands
+
+---
+
+# GIT
+
+- You may read history for context
+- Do NOT revert or restore files unless instructed
 
 ---
 
 # FAILSAFE
 
 If unsure:
-- Do NOT introduce new infrastructure
-- Do NOT introduce new abstraction layers
-- Choose the least invasive solution
-- Or ask for clarification
+- choose the least invasive solution
+- avoid new infrastructure
+- or ask for clarification
 
 ---
 
 # SUCCESS CRITERIA
 
 A solution is correct when:
-- It works within the existing system
-- It introduces minimal new concepts
-- It passes tests
-- It matches the intended architecture (not just functional behavior)
+- it works within the existing system
+- it introduces minimal new concepts
+- it passes tests
+- it aligns with current architecture

@@ -15,7 +15,7 @@ describe('Server Configuration Tests', () => {
       // Check for required configuration elements (HTTP dev server — no TLS)
       expect(configContent).not.toContain('basicSsl');
       expect(configContent).not.toMatch(/https:\s*true/);
-      expect(configContent).toContain('port: 5174');
+      expect(configContent).toMatch(/process\.env\.PORT/);
       expect(configContent).toContain('publicDir: \'public\'');
       expect(configContent).toContain('gifman-gifs-api');
       expect(configContent).toContain("pathname === '/api/gifs'");
@@ -168,7 +168,6 @@ describe('Server Configuration Tests', () => {
     it('returns gifs from /api/gifs', async () => {
       const vite = await createServer({
         configFile: join(process.cwd(), 'vite.config.ts'),
-        server: { port: 5174, strictPort: false },
         logLevel: 'error',
       });
       await vite.listen();

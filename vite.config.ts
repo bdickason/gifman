@@ -7,6 +7,8 @@ import react from '@vitejs/plugin-react'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const GIFS_JSON = path.resolve(__dirname, 'data/gifs.json')
 
+const port = process.env.PORT ? Number(process.env.PORT) : undefined
+
 function gifsApiMiddleware(
   req: { method?: string; url?: string },
   res: {
@@ -44,6 +46,14 @@ function gifmanGifsApiPlugin(): Plugin {
     name: 'gifman-gifs-api',
     configureServer(server) {
       server.middlewares.use(gifsApiMiddleware)
+      server.httpServer?.once('listening', () => {
+        const addr = server.httpServer?.address()
+        const listenPort =
+          addr && typeof addr === 'object' ? addr.port : undefined
+        console.log(
+          `[gifman] server running${listenPort != null ? ` (port ${listenPort})` : ''}`,
+        )
+      })
     },
     configurePreviewServer(server) {
       server.middlewares.use(gifsApiMiddleware)
@@ -55,14 +65,14 @@ export default defineConfig({
   plugins: [react(), gifmanGifsApiPlugin()],
   server: {
     host: true,
-    port: 5174,
+    port,
     open: false, // Auto-open browser
     fs: {
       // Allow serving files from parent directories
       allow: ['..']
     },
-    // Same WebSocket port as HTTP server — avoids failures when dev server picks
-    // another port (5176+) or when a fixed HMR port (e.g. 5174) is already in use.
+    // Same WebSocket port as HTTP server — avoids failures when the chosen HTTP
+    // port differs from Vite defaults or when a fixed HMR port is already in use.
     hmr: {
       overlay: true,
     },
