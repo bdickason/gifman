@@ -35,6 +35,25 @@ function firstLine(msg) {
   return line ?? '';
 }
 
+/**
+ * @param {string} raw from failureMessages[0]
+ * @returns {{ message: string, stack: string }}
+ */
+function splitMessageAndStack(raw) {
+  const full = typeof raw === 'string' ? raw : '';
+  const [messageLine, ...stackLines] = full.split(/\r?\n/);
+  const message = messageLine ?? '';
+  const stack = stackLines
+    .filter(
+      (line) =>
+        !line.includes('node_modules') &&
+        (line.includes('/src/') || line.includes('.test.')),
+    )
+    .slice(0, 5)
+    .join('\n');
+  return { message, stack };
+}
+
 async function main() {
   const chunks = [];
   for await (const chunk of process.stdin) {
@@ -52,11 +71,20 @@ async function main() {
     for (const a of assertions) {
       if (a.status !== 'failed') continue;
       const messages = a.failureMessages ?? [];
-      const message = firstLine(messages[0] ?? '') || firstLine(fileResult.message ?? '');
+      const rawFailure = messages[0] ?? '';
+      let message;
+      let stack = '';
+      if (rawFailure) {
+        ({ message, stack } = splitMessageAndStack(rawFailure));
+      } else {
+        message = firstLine(fileResult.message ?? '');
+      }
+      if (!message) message = firstLine(fileResult.message ?? '');
       failures.push({
         file,
         test: a.fullName ?? a.title ?? '',
         message,
+        stack,
       });
     }
   }
