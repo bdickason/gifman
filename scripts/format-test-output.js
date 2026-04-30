@@ -61,7 +61,8 @@ async function main() {
     }
   }
 
-  process.stdout.write(`${JSON.stringify({ failures }, null, 2)}\n`);
+  const status = failures.length === 0 ? 'pass' : 'fail';
+  console.log(JSON.stringify({ status, failures }, null, 2));
 }
 
 main().catch((err) => {
