@@ -67,12 +67,43 @@ If multiple valid approaches exist, choose the one with:
 
 ---
 
+# Execution Completion
+
+When all tests pass, you must stop execution immediately.
+
+Completion conditions:
+- The most recent test run returned all passing tests
+- No changes have been made since that test run
+
+When these conditions are met:
+- Emit a final summary
+- End the task
+
+Do NOT:
+- Call RUN_TESTS again
+- Make additional changes
+- Continue execution for validation purposes
+
+Green tests are a terminal state, not a checkpoint.
+
+--- 
+
 # TESTING & FEEDBACK LOOP
 
 - You do NOT have the ability to run shell commands
 - Any attempt to run npm, bash, or system commands will fail
+
 - The ONLY way to run tests is:
     RUN_TESTS
+
+- You should run tests ONLY:
+    - After implementing a change
+    - After fixing failing tests
+
+- Do NOT run tests:
+    - If tests have already passed
+    - If no changes have been made since the last test run
+
 - Always run tests after changes (if available)
 - Fix failures before proceeding
 - Update tests if behavior intentionally changes
@@ -100,16 +131,25 @@ If multiple valid approaches exist, choose the one with:
 
 - When emitting RUN_TESTS:
   - do NOT include explanations
-  - do NOT describe what you tried
   - output ONLY:
     RUN_TESTS
+
+- RUN_TESTS is ONLY valid if:
+    - Code has changed since the last test run
+    OR
+    - Tests previously failed and a fix was applied
+
+- RUN_TESTS is NOT valid if:
+    - The last test result was passing
+    - No changes have been made since the last run
 
 ---
 
 ## TEST BEHAVIOR
 
 - If status === "pass":
-  - continue or conclude
+  - emit final summary
+  - STOP execution
 
 - If status === "fail":
   - analyze failures carefully
@@ -117,19 +157,27 @@ If multiple valid approaches exist, choose the one with:
   - apply minimal fix
   - then emit RUN_TESTS again
 
-- Do NOT:
-  - assume tests pass
-  - fabricate results
-  - skip test execution
+Do NOT:
+- assume tests pass
+- fabricate results
+- skip test execution
+- re-run tests after a passing result
 
 ---
 
 ## ITERATION AWARENESS
 
 - Avoid repeated retries without meaningful changes
+
 - If failures persist:
   - reconsider approach
   - avoid repeating the same fix
+
+- Never re-run tests without making a change
+
+- If tests pass:
+  - do NOT continue iterating
+  - do NOT "double-check" by running tests again
 
 - Use metadata when available:
   - meta.attempt
@@ -139,6 +187,20 @@ If multiple valid approaches exist, choose the one with:
 - If iteration_limit_reached:
   - stop retrying
   - reassess solution
+
+---
+
+# TASK ORIENTATION
+
+Your role is to complete the user's request, not to explore or validate the system.
+
+- Focus on finishing the task as efficiently as possible
+- Do not perform extra validation beyond what is required
+- Do not test the system itself unless explicitly instructed
+
+Once the task is complete and tests pass:
+- Stop immediately
+- Do not continue working
 
 ---
 
